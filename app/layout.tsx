@@ -12,9 +12,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="antialiased min-h-screen font-sans text-[var(--ink-strong)]">
-        <Providers>{children}
-          <Analytics />
-        </Providers>
+        <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );
