@@ -8,6 +8,13 @@ export const ANS_ABI = [
     outputs: [{ name: "", type: "address" }],
   },
   {
+    name: "getOwner",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "name", type: "string" }],
+    outputs: [{ name: "", type: "address" }],
+  },
+  {
     name: "resolver",
     type: "function",
     stateMutability: "view",
@@ -16,6 +23,13 @@ export const ANS_ABI = [
   },
   {
     name: "expiry",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "name", type: "string" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    name: "getExpiry",
     type: "function",
     stateMutability: "view",
     inputs: [{ name: "name", type: "string" }],

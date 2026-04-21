@@ -7,7 +7,7 @@ import { ANS_ABI } from "@/lib/ansAbi";
 import { ANS_CONTRACT_ADDRESS, IS_DEMO_MODE, TREASURY_ADDRESS } from "@/lib/arcChain";
 import { shortAddress, TLD_COLORS } from "@/lib/utils";
 import { ExternalLink, Copy, Check, AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -81,11 +81,12 @@ function NameRow({ name }: { name: string }) {
   );
 }
 
-// Simulated: read owned names from on-chain events or indexer
-// Until we have an indexer, we read the reverse lookup (primary name)
-// and let users paste their other names manually.
-// Full indexer support can be added with Goldsky/Envio.
 function OwnedNames({ address }: { address: string }) {
+  const [names, setNames] = useState<string[]>([]);
+  const [isLoadingNames, setIsLoadingNames] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<Record<string, unknown> | null>(null);
+
   const { data: primaryName } = useReadContract({
     address: ANS_CONTRACT_ADDRESS,
     abi: ANS_ABI,
@@ -94,38 +95,126 @@ function OwnedNames({ address }: { address: string }) {
     query: { enabled: !IS_DEMO_MODE },
   });
 
-  const names: string[] = [];
-  if (primaryName && primaryName !== "") names.push(primaryName as string);
+  useEffect(() => {
+    if (IS_DEMO_MODE || !address) return;
+
+    let cancelled = false;
+
+    const loadOwnedNames = async () => {
+      setIsLoadingNames(true);
+      setLoadError(null);
+      setDebugInfo(null);
+
+      try {
+        // Add &debug=1 to enable debug output
+        const debugMode = typeof window !== "undefined" && window.location.search.includes("debug=1");
+        const debugParam = debugMode ? "&debug=1" : "";
+        const res = await fetch(`/api/ans/names?owner=${encodeURIComponent(address)}${debugParam}`, {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          const json = (await res.json().catch(() => null)) as { error?: string; debug?: Record<string, unknown> } | null;
+          throw new Error(json?.error || "Failed to fetch names");
+        }
+
+        const json = (await res.json()) as {
+          names?: string[];
+          debug?: Record<string, unknown>;
+        };
+        const result = Array.isArray(json.names)
+          ? Array.from(new Set(json.names.filter((n): n is string => typeof n === "string"))).sort((a, b) => a.localeCompare(b))
+          : [];
+
+        if (!cancelled) {
+          setNames(result);
+          if (json.debug) {
+            setDebugInfo(json.debug);
+          }
+        }
+      } catch (err) {
+        if (!cancelled) {
+          const message = err instanceof Error ? err.message : "Could not load names";
+          setLoadError(message);
+          setNames([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingNames(false);
+        }
+      }
+    };
+
+    loadOwnedNames();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [address]);
+
+  const mergedNames = Array.from(
+    new Set([
+      ...names,
+      ...(primaryName && (primaryName as string) !== "" ? [primaryName as string] : []),
+    ])
+  ).sort((a, b) => a.localeCompare(b));
 
   if (IS_DEMO_MODE) {
     return (
       <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl p-4 flex items-start gap-3 mb-6">
         <AlertCircle size={16} className="text-amber-400 mt-0.5 shrink-0" />
         <div>
-          <p className="text-sm text-amber-300 font-medium mb-1">Kontrat henüz deploy edilmedi</p>
+          <p className="text-sm text-amber-300 font-medium mb-1">Contract is not deployed yet</p>
           <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
-            <code className="text-amber-300 font-mono">contracts/DEPLOY_GUIDE.md</code> dosyasını
-            takip ederek Remix ile deploy et, ardından{" "}
-            <code className="text-amber-300 font-mono">.env.local</code> içine kontrat adresini yaz.
+            Follow <code className="text-amber-300 font-mono">contracts/DEPLOY_GUIDE.md</code> and deploy with Remix,
+            then put the contract address into <code className="text-amber-300 font-mono">.env.local</code>.
           </p>
         </div>
       </div>
     );
   }
 
-  if (names.length === 0) {
+  if (isLoadingNames) {
     return (
       <div className="py-12 text-center text-[var(--ink-muted)] text-sm">
-        Bu cüzdanda kayıtlı isim bulunamadı
+        Loading claimed names...
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="py-12 text-center text-red-400 text-sm">
+        {loadError}
+        {debugInfo && (
+          <div className="mt-4 text-xs text-red-300 bg-red-950 rounded p-3 text-left">
+            <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (mergedNames.length === 0) {
+    return (
+      <div className="py-12 text-center text-[var(--ink-muted)] text-sm">
+        No claimed names were found for this wallet
       </div>
     );
   }
 
   return (
     <>
-      {names.map((name) => (
+      {mergedNames.map((name) => (
         <NameRow key={name} name={name} />
       ))}
+      {debugInfo && (
+        <div className="mt-6 p-3 bg-slate-900 rounded text-xs text-slate-300 border border-slate-700">
+          <p className="font-mono mb-2">Debug Info:</p>
+          <pre className="whitespace-pre-wrap text-slate-400">{JSON.stringify(debugInfo, null, 2)}</pre>
+        </div>
+      )}
     </>
   );
 }
@@ -149,7 +238,7 @@ export default function AccountPage() {
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-[var(--ink-strong)] mb-2">My Names</h1>
             <p className="text-[var(--ink-muted)] text-sm mb-6">
-              Cüzdanını bağla ve Arc isimlerini gör
+              Connect your wallet to view your Arc names
             </p>
             <ConnectButton />
           </div>
@@ -180,7 +269,7 @@ export default function AccountPage() {
               {primaryName as string}
             </div>
             <p className="text-xs text-[var(--ink-muted)] mt-1">
-              Başkaları adresini aradığında bu isim gösterilir
+              This name is shown when others look up your address
             </p>
           </div>
         )}
@@ -190,11 +279,11 @@ export default function AccountPage() {
           <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl p-4 flex items-start gap-3 mb-8">
             <AlertCircle size={16} className="text-amber-400 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm text-amber-300 font-medium mb-1">Demo Mode — Kontrat Deploy Edilmedi</p>
+              <p className="text-sm text-amber-300 font-medium mb-1">Demo Mode - Contract Not Deployed</p>
               <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
-                Remix üzerinden <code className="text-amber-300 font-mono">ArcNameService.sol</code> deploy et →{" "}
-                adresi <code className="text-amber-300 font-mono">.env.local</code> dosyasına yaz →{" "}
-                <code className="text-amber-300 font-mono">npm run dev</code> yeniden başlat.
+                Deploy <code className="text-amber-300 font-mono">ArcNameService.sol</code> via Remix -&gt;
+                add the address to <code className="text-amber-300 font-mono">.env.local</code> -&gt;
+                restart <code className="text-amber-300 font-mono">npm run dev</code>.
               </p>
             </div>
           </div>
@@ -203,7 +292,7 @@ export default function AccountPage() {
         {/* Names list */}
         <div className="bg-[var(--surface-1)] border border-[var(--line)] rounded-2xl px-5">
           <div className="py-4 border-b border-[var(--line)] flex items-center justify-between">
-            <span className="text-sm font-medium text-[var(--ink-strong)]">Kayıtlı İsimler</span>
+            <span className="text-sm font-medium text-[var(--ink-strong)]">Claimed Names</span>
             {!IS_DEMO_MODE && (
               <a
                 href={`https://testnet.arcscan.app/address/${address}`}
@@ -211,7 +300,7 @@ export default function AccountPage() {
                 rel="noreferrer"
                 className="text-xs text-[var(--ink-muted)] hover:text-[var(--ink-strong)] transition-colors flex items-center gap-1"
               >
-                ArcScan&apos;da Gör <ExternalLink size={10} />
+                View on ArcScan <ExternalLink size={10} />
               </a>
             )}
           </div>
@@ -234,7 +323,7 @@ export default function AccountPage() {
             </a>
           </div>
           <p className="text-xs text-[var(--ink-muted)] mt-1">
-            Tüm registration fee&apos;leri buraya direkt gönderilir
+            All registration fees are sent here directly
           </p>
         </div>
       </main>

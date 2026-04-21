@@ -51,6 +51,22 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
+## Environment Variables
+
+Add these values to `.env.local`:
+
+```bash
+# Deployed ArcNameService contract on Arc testnet
+NEXT_PUBLIC_ANS_CONTRACT_ADDRESS=0x...
+
+# Circle Contracts API credential
+# Must be the full Bearer token in the format PREFIX:ID:SECRET
+CIRCLE_API_KEY=...
+
+# Optional override (default: https://api.circle.com)
+CIRCLE_API_BASE_URL=https://api.circle.com
+```
+
 ## Deploy the Smart Contract
 
 1. Get testnet USDC from [faucet.circle.com](https://faucet.circle.com)
@@ -71,6 +87,9 @@ GET /api/ans/check?name=myagent.agent
 
 # Resolve name
 GET /api/ans/resolve?name=alice.arc
+
+# List claimed names for wallet (via Circle Contracts API)
+GET /api/ans/names?owner=0x...
 
 # Register (requires server wallet config)
 POST /api/ans/register
