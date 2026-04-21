@@ -85,14 +85,14 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
     >
       <div className="p-5">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div>
-            <div className="flex items-baseline gap-0.5">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-0.5 whitespace-nowrap">
               <span className="text-xl font-semibold text-[var(--ink-strong)]">{label}</span>
               <span className="text-xl font-medium" style={{ color: colors.text }}>{tld}</span>
             </div>
             {owner && (
-              <p className="text-xs text-[var(--ink-muted)] mt-0.5">
+              <p className="text-xs text-[var(--ink-muted)] mt-0.5 break-all">
                 Owned by{" "}
                 <a
                   href={`https://testnet.arcscan.app/address/${owner}`}
@@ -108,7 +108,7 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
           </div>
 
           {/* Status badge */}
-          <div className="shrink-0">
+          <div className="shrink-0 self-start">
             {available === null ? (
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-2)] text-[var(--ink-muted)] text-xs border border-[var(--line)]">
                 <Loader2 size={12} className="animate-spin" />
@@ -156,7 +156,7 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
                 {/* Duration selector */}
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-[var(--ink-muted)]">Duration</span>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 flex-wrap">
                     {[1, 2, 3, 5].map((y) => (
                       <button
                         key={y}
@@ -177,7 +177,7 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
                 {/* Balance indicator */}
                 {isConnected && balanceUSDC !== null && (
                   <div
-                    className="flex items-center justify-between rounded-lg px-3 py-2 text-xs"
+                    className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs"
                     style={{
                       background: hasEnoughBalance
                         ? "rgba(52,211,153,0.06)"
@@ -187,12 +187,12 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
                         : "rgba(251,191,36,0.2)"}`,
                     }}
                   >
-                    <span className="text-[var(--ink-muted)] flex items-center gap-1.5">
+                    <span className="text-[var(--ink-muted)] flex items-center gap-1.5 min-w-0">
                       <Fuel size={11} />
-                      Cüzdan bakiyesi
+                      Wallet balance
                     </span>
                     <span
-                      className="font-semibold"
+                      className="font-semibold shrink-0"
                       style={{ color: hasEnoughBalance ? "#34d399" : "#fbbf24" }}
                     >
                       {balanceUSDC.toFixed(2)} USDC
@@ -211,9 +211,9 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
                   >
                     <div className="flex items-start gap-2">
                       <AlertTriangle size={13} className="text-amber-400 mt-0.5 shrink-0" />
-                      <p className="text-xs text-amber-300 leading-relaxed">
-                        Bu isim için <span className="font-semibold">${totalRequired.toFixed(2)} USDC</span> gerekiyor.
-                        Bakiyende <span className="font-semibold">${shortfall}</span> eksik.
+                      <p className="text-xs text-amber-300 leading-relaxed break-words">
+                        You need <span className="font-semibold">${totalRequired.toFixed(2)} USDC</span> for this name.
+                        You are short by <span className="font-semibold">${shortfall}</span>.
                       </p>
                     </div>
                     <a
@@ -227,11 +227,11 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
                         border: "0.5px solid rgba(251,191,36,0.3)",
                       }}
                     >
-                      Testnet USDC al → faucet.circle.com
+                      Get testnet USDC - faucet.circle.com
                       <ExternalLink size={10} />
                     </a>
                     <p className="text-center text-xs" style={{ color: "rgba(251,191,36,0.5)" }}>
-                      Network: Arc Testnet · 20 USDC / 2 saat
+                      Network: Arc Testnet · 20 USDC / 2 hours
                     </p>
                   </div>
                 )}
@@ -240,36 +240,36 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
                 <button
                   onClick={handleRegister}
                   disabled={btnState !== "ready"}
-                  className="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed px-3 text-center break-words"
                   style={{ background: "#17362c" }}
                 >
-                  {btnState === "not_connected" && "Cüzdan bağla"}
+                  {btnState === "not_connected" && "Connect wallet"}
                   {btnState === "loading_balance" && (
-                    <><Loader2 size={14} className="animate-spin" /> Bakiye kontrol ediliyor…</>
+                    <><Loader2 size={14} className="animate-spin" /> Checking balance...</>
                   )}
                   {btnState === "insufficient" && (
-                    <><AlertTriangle size={14} /> Yetersiz bakiye</>
+                    <><AlertTriangle size={14} /> Insufficient balance</>
                   )}
                   {btnState === "pending" && (
-                    <><Loader2 size={14} className="animate-spin" /> Cüzdanda onayla…</>
+                    <><Loader2 size={14} className="animate-spin" /> Confirm in wallet...</>
                   )}
                   {btnState === "mining" && (
-                    <><Loader2 size={14} className="animate-spin" /> Arc&apos;ta onaylanıyor…</>
+                    <><Loader2 size={14} className="animate-spin" /> Confirming on Arc...</>
                   )}
                   {btnState === "ready" && `Register for $${registrationCost} USDC`}
                 </button>
 
                 {/* Cost breakdown */}
-                <div className="flex justify-between text-xs text-[var(--ink-muted)] px-0.5">
-                  <span>Registration: ${registrationCost} + Gas: $0.01</span>
-                  <span>Toplam: ${totalRequired.toFixed(2)} USDC</span>
+                <div className="flex flex-wrap justify-between gap-1 text-xs text-[var(--ink-muted)] px-0.5">
+                  <span className="break-words">Registration: ${registrationCost} + Gas: $0.01</span>
+                  <span className="shrink-0">Total: ${totalRequired.toFixed(2)} USDC</span>
                 </div>
 
                 {/* Write error */}
                 {writeError && (
-                  <p className="text-xs text-red-400 text-center">
+                  <p className="text-xs text-red-400 text-center break-words">
                     {writeError.message.includes("insufficient")
-                      ? "Yetersiz bakiye — faucet'ten USDC al"
+                      ? "Insufficient balance - get USDC from the faucet"
                       : writeError.message.slice(0, 80)}
                   </p>
                 )}
@@ -278,7 +278,7 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
               /* Success state */
               <div className="text-center py-3 space-y-1.5">
                 <p className="text-sm text-[var(--ink-strong)]">
-                  🎉 <span className="font-medium">{fullName}</span> artık senin!
+                  🎉 <span className="font-medium break-all">{fullName}</span> is now yours!
                 </p>
                 {txHash && (
                   <a
@@ -288,7 +288,7 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
                     className="text-xs inline-flex items-center gap-1 transition-colors"
                     style={{ color: "#4e6548" }}
                   >
-                    ArcScan&apos;da görüntüle <ExternalLink size={10} />
+                    View on ArcScan <ExternalLink size={10} />
                   </a>
                 )}
               </div>

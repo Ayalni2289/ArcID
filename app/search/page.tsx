@@ -26,7 +26,7 @@ function SearchResults({ label }: { label: string }) {
       <p className="text-sm text-[var(--ink-muted)]">
         Showing results for <span className="text-[var(--ink-strong)] font-mono">"{label}"</span>
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {TLD_OPTIONS.map((tld) => (
           <NameCardWrapper key={tld} label={label} tld={tld} />
         ))}
@@ -76,7 +76,7 @@ function SearchPageInner() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-12">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-12">
         <div className="mb-10">
           <SearchBar initialQuery={q} size="md" />
         </div>
