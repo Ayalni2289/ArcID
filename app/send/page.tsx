@@ -1,13 +1,14 @@
 "use client";
+"use client";
 
 import { useState } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+// 1. useReadContract hook'unu ekledik
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { parseUnits } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Navbar from "@/components/Navbar";
 import { ANS_ABI } from "@/lib/ansAbi";
 import { ANS_CONTRACT_ADDRESS, USDC_ADDRESS } from "@/lib/arcChain";
-import { validateLabel } from "@/lib/utils";
 import { ArrowRight, Loader2, CheckCircle, ExternalLink } from "lucide-react";
 
 const USDC_ABI = [
@@ -33,6 +34,19 @@ export default function SendPage() {
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isLoading: isMining, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
+  // 2. Resolve sorgusu için Hook tanımlıyoruz
+  // 'query.enabled: false' diyerek sayfa yüklenince değil, biz istediğimizde çalışmasını sağlıyoruz
+  const { refetch: resolveName } = useReadContract({
+    address: ANS_CONTRACT_ADDRESS as `0x${string}`,
+    abi: ANS_ABI,
+    functionName: "resolve",
+    args: [recipient],
+    query: {
+      enabled: false,
+      retry: false,
+    },
+  });
+
   if (isMining && step === "sending") setStep("done");
 
   const isArcName = (r: string) => /\.(arc|agent|usdc)$/.test(r.toLowerCase());
@@ -45,11 +59,29 @@ export default function SendPage() {
 
     if (isArcName(recipient)) {
       setStep("resolving");
-      // Demo: simulate resolution
-      await new Promise(r => setTimeout(r, 800));
-      const mockAddr = "0x3f" + Array.from({length:38}, () => Math.floor(Math.random()*16).toString(16)).join("");
-      setResolvedAddress(mockAddr);
-      setStep("confirm");
+      
+      try {
+        // 3. Hook'un sağladığı refetch'i çağırıyoruz
+        const { data: result, error: readError } = await resolveName();
+
+        if (readError) throw readError;
+
+        const resolved = result as string;
+
+        // Geçersiz veya boş adres kontrolü
+        if (!resolved || /^0x0+$/.test(resolved)) {
+          setError("This name is not registered or does not resolve.");
+          setStep("input");
+          return;
+        }
+
+        setResolvedAddress(resolved);
+        setStep("confirm");
+      } catch (err) {
+        console.error("Resolution error:", err);
+        setError("Failed to resolve name. Make sure you are on Arc Testnet.");
+        setStep("input");
+      }
     } else if (isAddress(recipient)) {
       setResolvedAddress(recipient);
       setStep("confirm");
@@ -61,7 +93,6 @@ export default function SendPage() {
   const handleSend = () => {
     if (!resolvedAddress) return;
     setStep("sending");
-    // Send USDC via ERC-20 transfer
     writeContract({
       address: USDC_ADDRESS,
       abi: USDC_ABI,
@@ -69,7 +100,7 @@ export default function SendPage() {
       args: [resolvedAddress as `0x${string}`, parseUnits(amount, 6)],
     });
   };
-
+  
   if (!isConnected) {
     return (
       <div className="min-h-screen flex flex-col">

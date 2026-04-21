@@ -193,7 +193,7 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
                     </span>
                     <span
                       className="font-semibold shrink-0"
-                      style={{ color: hasEnoughBalance ? "#34d399" : "#fbbf24" }}
+                      style={{ color: hasEnoughBalance ? "#34d399" : "#fb6c24" }}
                     >
                       {balanceUSDC.toFixed(2)} USDC
                     </span>
@@ -211,26 +211,28 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
                   >
                     <div className="flex items-start gap-2">
                       <AlertTriangle size={13} className="text-amber-400 mt-0.5 shrink-0" />
-                      <p className="text-xs text-amber-300 leading-relaxed break-words">
-                        You need <span className="font-semibold">${totalRequired.toFixed(2)} USDC</span> for this name.
-                        You are short by <span className="font-semibold">${shortfall}</span>.
+                      <p className="text-xs text-black leading-relaxed break-words">
+                        You need <span className="font-semibold text-red-500">${totalRequired.toFixed(2)} USDC</span> for this name.
+                        You are short by <span className="font-semibold text-red-500">${shortfall}</span>.
                       </p>
                     </div>
                     <a
                       href={FAUCET_URL}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-xs font-medium transition-all"
+                      // hover:scale-[1.02] üzerine gelince %2 büyütür, active:scale-95 tıklayınca küçültür
+                      className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                       style={{
                         background: "rgba(251,191,36,0.15)",
-                        color: "#fbbf24",
+                        color: "#000000",
                         border: "0.5px solid rgba(251,191,36,0.3)",
+                        // Pulse animasyonunu buradan kaldırdık
                       }}
                     >
                       Get testnet USDC - faucet.circle.com
                       <ExternalLink size={10} />
                     </a>
-                    <p className="text-center text-xs" style={{ color: "rgba(251,191,36,0.5)" }}>
+                    <p className="text-center text-xs" style={{ color: "rgba(0, 0, 0, 0.5)" }}>
                       Network: Arc Testnet · 20 USDC / 2 hours
                     </p>
                   </div>
