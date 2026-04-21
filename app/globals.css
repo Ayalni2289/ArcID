@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+	--bg-base: #ebe8e1;
+	--bg-soft: #dfddd5;
+	--surface-1: #f3f1ea;
+	--surface-2: #e8e6de;
+	--ink-strong: #17362c;
+	--ink-muted: #4e6548;
+	--accent: #c6b879;
+	--accent-deep: #a8965f;
+	--line: #c9cfc4;
+}
+
+html, body {
+	background: radial-gradient(circle at top, #f4f2ec 0%, var(--bg-base) 45%, #e5e2d9 100%);
+	color: var(--ink-strong);
+}
