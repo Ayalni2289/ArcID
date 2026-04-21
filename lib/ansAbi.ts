@@ -116,6 +116,7 @@ export const ANS_ABI = [
       { name: "name", type: "string", indexed: false },
       { name: "owner", type: "address", indexed: true },
       { name: "expiry", type: "uint256", indexed: false },
+      { name: "feePaid", type: "uint256", indexed: false }, // <--- BU SATIRI EKLEDİK
     ],
   },
   {
