@@ -43,21 +43,32 @@ export default function Navbar() {
 
         {/* Wallet */}
         <ConnectButton
-          chainStatus="icon"
+          chainStatus={{ smallScreen: "none", largeScreen: "icon" }}
           showBalance={false}
-          accountStatus="avatar"
+          accountStatus={{ smallScreen: "avatar", largeScreen: "avatar" }}
         />
       </div>
-    </header>
-  );
-}
 
-function HexIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M7 1L12 4V10L7 13L2 10V4L7 1Z" fill="#d9d4c4" fillOpacity="0.95" />
-      <circle cx="7" cy="7" r="2" fill="#4e6548" />
-      <circle cx="7" cy="7" r="1" fill="#f4f2ec" />
-    </svg>
+      {/* Mobile nav */}
+      <nav className="sm:hidden border-t border-[var(--line)] bg-[var(--surface-1)]/95">
+        <div className="max-w-6xl mx-auto px-4 overflow-x-auto">
+          <div className="flex items-center gap-1 py-2 min-w-max">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
+                  pathname === link.href
+                    ? "bg-[var(--surface-2)] text-[var(--ink-strong)]"
+                    : "text-[var(--ink-muted)] hover:text-[var(--ink-strong)] hover:bg-[#ece9e0]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </nav>
+    </header>
   );
 }

@@ -127,7 +127,7 @@ export default function ResolvePage() {
         {submitted && <ResolveResult query={submitted} />}
 
         {/* Info cards */}
-        <div className="grid grid-cols-2 gap-3 mt-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-12">
           <div className="bg-[var(--surface-1)] border border-[var(--line)] rounded-xl p-4">
             <div className="text-xs text-[var(--ink-muted)] mb-1">Forward lookup</div>
             <div className="font-mono text-xs text-[var(--ink-strong)]">name → address</div>

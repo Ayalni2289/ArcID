@@ -34,7 +34,7 @@ export default function SearchBar({ initialQuery = "", autoFocus = false, size =
 
   const inputClass =
     size === "lg"
-      ? "w-full bg-[var(--surface-1)] border border-[var(--line)] rounded-2xl text-[var(--ink-strong)] placeholder-[#8c9889] focus:outline-none focus:border-[var(--accent-deep)] focus:ring-0 transition-colors text-base px-5 py-4 pr-36"
+      ? "w-full bg-[var(--surface-1)] border border-[var(--line)] rounded-2xl text-[var(--ink-strong)] placeholder-[#8c9889] focus:outline-none focus:border-[var(--accent-deep)] focus:ring-0 transition-colors text-base px-5 py-4 pr-24 sm:pr-36"
       : "w-full bg-[var(--surface-1)] border border-[var(--line)] rounded-xl text-[var(--ink-strong)] placeholder-[#8c9889] focus:outline-none focus:border-[var(--accent-deep)] transition-colors text-sm px-4 py-3 pr-28";
 
   return (
@@ -53,7 +53,7 @@ export default function SearchBar({ initialQuery = "", autoFocus = false, size =
         onClick={handleSearch}
         disabled={loading || !query}
         className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2 bg-[var(--ink-strong)] hover:bg-[#25473a] disabled:opacity-40 disabled:cursor-not-allowed text-[#ece9e0] rounded-xl transition-all font-medium ${
-          size === "lg" ? "px-5 py-2.5 text-sm" : "px-4 py-2 text-xs"
+          size === "lg" ? "px-3 sm:px-5 py-2.5 text-sm" : "px-4 py-2 text-xs"
         }`}
       >
         {loading ? (
@@ -61,7 +61,7 @@ export default function SearchBar({ initialQuery = "", autoFocus = false, size =
         ) : (
           <Search size={14} />
         )}
-        Search
+        <span className={size === "lg" ? "hidden sm:inline" : "inline"}>Search</span>
       </button>
     </div>
   );

@@ -87,7 +87,7 @@ export default function NameCard({ label, tld, available, owner, expiryTimestamp
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
           <div className="min-w-0">
-            <div className="flex items-baseline gap-0.5 whitespace-nowrap">
+            <div className="flex items-baseline gap-0.5 flex-wrap">
               <span className="text-xl font-semibold text-[var(--ink-strong)]">{label}</span>
               <span className="text-xl font-medium" style={{ color: colors.text }}>{tld}</span>
             </div>
